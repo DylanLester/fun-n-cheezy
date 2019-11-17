@@ -294,9 +294,4 @@ export const meals = [
   cornedBeef,
   chickenAndCashews,
   shepherdsPie,
-  spaghetti,
-  crumbedFish,
-  cornedBeef,
-  chickenAndCashews,
-  shepherdsPie,
 ]
