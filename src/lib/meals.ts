@@ -1,3 +1,8 @@
+export interface Category {
+  id: string
+  name: string
+}
+
 export interface Ingredient {
   name: string
   ingredients?: Ingredient[]
@@ -24,9 +29,26 @@ export interface Meal {
   }
   australianMadePercentage: number
   australianMadeLine?: string
-  // categories: ['Fresh Chilled', ...]
-  // imgUrl (probably not needed as it should use the ID of the item)
+  categories: Category[]
+  // imgUrl (probably not needed as it should use the ID of the item) or should be sourced from a CRM
 }
+
+export const categories: Category[] = [
+  { id: "all", name: "Show All Dinners" },
+  { id: "freshChilled", name: "Fresh Chilled" },
+  { id: "asian", name: "Asian" },
+  { id: "beef", name: "Beef" },
+  { id: "chicken", name: "Chicken" },
+  { id: "indian", name: "Indian" },
+  { id: "internationalTastes", name: "International Tastes" },
+  { id: "lamb", name: "Lamb" },
+  { id: "meatFree", name: "Meat Free" },
+  { id: "pasta", name: "Pasta" },
+  { id: "roasts", name: "Roasts" },
+  { id: "seafood", name: "Seafood" },
+  { id: "steaks", name: "Steaks" },
+  { id: "traditional", name: "Traditional" },
+]
 
 export const spaghetti: Meal = {
   id: "spaghetti",
@@ -64,6 +86,11 @@ export const spaghetti: Meal = {
   },
   australianMadePercentage: 0.83,
   australianMadeLine: "with quality Italian pasta",
+  categories: [
+    { id: "beef", name: "Beef" },
+    { id: "pasta", name: "Pasta" },
+    { id: "traditional", name: "Traditional" },
+  ],
 }
 
 export const crumbedFish: Meal = {
@@ -133,6 +160,7 @@ export const crumbedFish: Meal = {
     servingSizeG: 386,
   },
   australianMadePercentage: 0.37,
+  categories: [{ id: "seafood", name: "Seafood" }],
 }
 
 export const cornedBeef: Meal = {
@@ -185,6 +213,10 @@ export const cornedBeef: Meal = {
     servingSizeG: 488,
   },
   australianMadePercentage: 0.74,
+  categories: [
+    { id: "beef", name: "Beef" },
+    { id: "traditional", name: "Traditional" },
+  ],
 }
 
 export const shepherdsPie: Meal = {
@@ -241,6 +273,10 @@ export const shepherdsPie: Meal = {
     servingSizeG: 478,
   },
   australianMadePercentage: 0.85,
+  categories: [
+    { id: "beef", name: "Beef" },
+    { id: "traditional", name: "Traditional" },
+  ],
 }
 
 export const chickenAndCashews: Meal = {
@@ -288,6 +324,7 @@ export const chickenAndCashews: Meal = {
     servingSizeG: 440,
   },
   australianMadePercentage: 0.82,
+  categories: [{ id: "chicken", name: "Chicken" }],
 }
 
 export const meals = [

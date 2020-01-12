@@ -1,11 +1,11 @@
-import React, { useState, useReducer } from "react"
+import React, { useState, useReducer, useEffect } from "react"
 import nanoid from "nanoid"
 import { GoTrashcan, GoAlert } from "react-icons/go"
 import TooltipTrigger from "react-popper-tooltip"
 import formatNumber from "format-number"
 import Modal from "react-modal"
 
-import { meals, Meal } from "../lib/meals"
+import { categories, Category, meals, Meal } from "../lib/meals"
 import australianMadeLogo from "../images/australianMadeLogo.jpg"
 
 const IMG_SERVER = "http://localhost:5000/"
@@ -17,28 +17,6 @@ const colours = {
   text: "#4a4a4a",
   border: "#e0e0e0",
 }
-
-interface Category {
-  id: string
-  name: string
-}
-
-const categories: Category[] = [
-  { id: "all", name: "Show All Dinners" },
-  { id: "freshChilled", name: "Fresh Chilled" },
-  { id: "asian", name: "Asian" },
-  { id: "beef", name: "Beef" },
-  { id: "chicken", name: "Chicken" },
-  { id: "indian", name: "Indian" },
-  { id: "internationalTastes", name: "International Tastes" },
-  { id: "lamb", name: "Lamb" },
-  { id: "meatFree", name: "Meat Free" },
-  { id: "pasta", name: "Pasta" },
-  { id: "roasts", name: "Roasts" },
-  { id: "seafood", name: "Seafood" },
-  { id: "steaks", name: "Steaks" },
-  { id: "traditional", name: "Traditional" },
-]
 
 type CartItem = Meal & { cartItemId: string }
 
@@ -123,8 +101,17 @@ const REQUIRED_DINNERS = 6
 
 const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState(categories[0])
-  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(meals[0])
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const [cart, cartDispatch] = useReducer(cartReducer, { items: [] })
+
+  const mealsFilteredByCategory =
+    selectedCategory.id === "all"
+      ? meals
+      : meals.filter(x => x.categories.some(x => x.id === selectedCategory.id))
+
+  useEffect(() => {
+    setSelectedMeal(mealsFilteredByCategory[0])
+  }, [mealsFilteredByCategory])
 
   return (
     <>
@@ -236,6 +223,7 @@ const App: React.FC = () => {
             }}
           >
             <MealListMaster
+              meals={mealsFilteredByCategory}
               onAddToCart={meal => cartDispatch({ type: "ADD_ITEM", meal })}
               selectedMeal={selectedMeal}
               onSelectMeal={mealId =>
@@ -346,6 +334,7 @@ interface MealCategoriesProps {
 }
 
 const MealListMaster: React.FC<MealListMasterProps> = ({
+  meals,
   onAddToCart,
   selectedMeal,
   onSelectMeal,
@@ -395,6 +384,7 @@ const MealListMaster: React.FC<MealListMasterProps> = ({
 }
 
 interface MealListMasterProps {
+  meals: Meal[]
   onAddToCart: (meal: Meal) => void
   selectedMeal: Meal | null
   onSelectMeal: (meal: Meal) => void
