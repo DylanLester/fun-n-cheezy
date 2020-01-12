@@ -1,8 +1,9 @@
 import React, { useState, useReducer } from "react"
 import nanoid from "nanoid"
-import { FiTrash2 } from "react-icons/fi"
+import { GoTrashcan, GoAlert } from "react-icons/go"
 import TooltipTrigger from "react-popper-tooltip"
 import formatNumber from "format-number"
+import Modal from "react-modal"
 
 import { meals, Meal } from "../lib/meals"
 import australianMadeLogo from "../images/australianMadeLogo.jpg"
@@ -42,15 +43,48 @@ const categories: Category[] = [
 type CartItem = Meal & { cartItemId: string }
 
 type cartReducerActions =
-  | { type: "add"; meal: Meal }
-  | { type: "remove"; cartItemId: string }
+  | { type: "ADD_ITEM"; meal: Meal }
+  | { type: "REMOVE_ITEM"; cartItemId: string }
+  | { type: "CONFIRM_ITEMS" }
+  | { type: "CLOSE_ERROR_MODAL" }
 
-const cartReducer = (state: CartItem[], action: cartReducerActions) => {
+interface Cart {
+  items: CartItem[]
+  error?: "MAX_ITEMS_REACHED" | "NOT_ENOUGH_ITEMS"
+}
+
+const cartReducer = (state: Cart, action: cartReducerActions): Cart => {
   switch (action.type) {
-    case "add":
-      return [...state, { ...action.meal, cartItemId: nanoid() }]
-    case "remove":
-      return state.filter(x => x.cartItemId !== action.cartItemId)
+    case "ADD_ITEM": {
+      if (state.items.length === REQUIRED_DINNERS) {
+        return { ...state, error: "MAX_ITEMS_REACHED" }
+      }
+
+      return {
+        ...state,
+        items: [...state.items, { ...action.meal, cartItemId: nanoid() }],
+      }
+    }
+
+    case "REMOVE_ITEM": {
+      return {
+        ...state,
+        items: state.items.filter(x => x.cartItemId !== action.cartItemId),
+      }
+    }
+
+    case "CONFIRM_ITEMS": {
+      if (state.items.length !== REQUIRED_DINNERS) {
+        return { ...state, error: "NOT_ENOUGH_ITEMS" }
+      }
+
+      return state
+    }
+
+    case "CLOSE_ERROR_MODAL": {
+      return { ...state, error: undefined }
+    }
+
     default:
       throw new Error()
   }
@@ -90,119 +124,175 @@ const REQUIRED_DINNERS = 6
 const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState(categories[0])
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(meals[0])
-  const [cart, cartDispatch] = useReducer(cartReducer, [])
+  const [cart, cartDispatch] = useReducer(cartReducer, { items: [] })
 
   return (
-    <div
-      style={{
-        padding: "1.5rem",
-        borderRadius: 5,
-        maxWidth: 1160,
-        backgroundColor: "whiteSmoke",
-        border: "1px solid lightgrey",
-      }}
-    >
-      <div
+    <>
+      <Modal
+        isOpen={!!cart.error}
+        onRequestClose={() => cartDispatch({ type: "CLOSE_ERROR_MODAL" })}
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          borderBottom: "4px solid OliveDrab",
-          alignItems: "center",
+          content: {
+            top: "35%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+            border: "1px solid FireBrick",
+            backgroundColor: "LavenderBlush",
+            maxWidth: "20rem",
+            textAlign: "center",
+          },
+          overlay: {
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(15, 15, 15, 0.75)",
+          },
         }}
+        contentLabel="Cart Error Modal"
       >
-        <div>
-          <h1
-            style={{
-              color: "darkgreen",
-              fontWeight: "normal",
-              marginTop: 0,
-              marginBottom: "0.5rem",
-            }}
-          >
-            Choose Dinners
-          </h1>
-          <div style={{ color: "darkgreen", marginBottom: "1rem" }}>
-            {cart.length} dinner{cart.length !== 1 && "s"} selected /{" "}
-            <strong>{REQUIRED_DINNERS - cart.length} left to select</strong>
-          </div>
-        </div>
-        <Button>Confirm Selections</Button>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 2fr 2fr",
-          gridColumnGap: "1.5rem",
-          marginTop: "1.5rem",
-        }}
-      >
-        <div style={{ maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT }}>
-          <MealCategories
-            selectedCategory={selectedCategory}
-            onSelectCategory={category => setSelectedCategory(category)}
-          />
-        </div>
-        <div
-          style={{
-            maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
-            overflowY: "auto",
-          }}
-        >
-          <MealListMaster
-            onAddToCart={meal => cartDispatch({ type: "add", meal })}
-            selectedMeal={selectedMeal}
-            onSelectMeal={mealId =>
-              setSelectedMeal(x => (x === mealId ? null : mealId))
-            }
-          />
-        </div>
-        <div
-          style={{
-            maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
-            overflowY: "auto",
-          }}
-        >
-          {selectedMeal && (
-            <MealListDetail
-              meal={selectedMeal}
-              onAddToCart={meal => cartDispatch({ type: "add", meal })}
-            />
+        <GoAlert style={{ fontSize: "1.25rem", color: "FireBrick" }} />
+        <p style={{ fontFamily: "sans-serif", color: "DimGray" }}>
+          {cart.error === "MAX_ITEMS_REACHED" && (
+            <span>
+              You have already selected the maximum number of meals, please
+              remove some if you wish to choose more.
+            </span>
           )}
-        </div>
-      </div>
+          {cart.error === "NOT_ENOUGH_ITEMS" && (
+            <span>
+              Invalid number of meals. Please select {REQUIRED_DINNERS} more to
+              complete or delete all choices.
+            </span>
+          )}
+        </p>
+        <ErrorButton
+          onClick={() => cartDispatch({ type: "CLOSE_ERROR_MODAL" })}
+        >
+          Ok
+        </ErrorButton>
+      </Modal>
 
       <div
         style={{
-          border: "1px solid lightgrey",
-          marginTop: "5rem",
-          padding: "2rem",
+          padding: "1.5rem",
           borderRadius: 5,
-          backgroundColor: "white",
+          maxWidth: 1160,
+          backgroundColor: "whiteSmoke",
+          border: "1px solid lightgrey",
         }}
       >
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "baseline",
             borderBottom: "4px solid OliveDrab",
+            alignItems: "center",
           }}
         >
-          <h2 style={{ color: "darkgreen" }}>Your Dinners Selections</h2>
-          <span style={{ color: "darkgreen" }}>
-            {cart.length} dinner{cart.length !== 1 && "s"} selected /{" "}
-            <strong>{REQUIRED_DINNERS - cart.length} left to select</strong>
-          </span>
+          <div>
+            <h1
+              style={{
+                color: "darkgreen",
+                fontWeight: "normal",
+                marginTop: 0,
+                marginBottom: "0.5rem",
+              }}
+            >
+              Choose Dinners
+            </h1>
+            <div style={{ color: "darkgreen", marginBottom: "1rem" }}>
+              {cart.items.length} dinner{cart.items.length !== 1 && "s"}{" "}
+              selected /{" "}
+              <strong>
+                {REQUIRED_DINNERS - cart.items.length} left to select
+              </strong>
+            </div>
+          </div>
+          <Button onClick={() => cartDispatch({ type: "CONFIRM_ITEMS" })}>
+            Confirm Selections
+          </Button>
         </div>
-        <CheckoutList
-          meals={cart}
-          onRemoveFromCart={meal =>
-            cartDispatch({ type: "remove", cartItemId: meal.cartItemId })
-          }
-        />
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 2fr 2fr",
+            gridColumnGap: "1.5rem",
+            marginTop: "1.5rem",
+          }}
+        >
+          <div style={{ maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT }}>
+            <MealCategories
+              selectedCategory={selectedCategory}
+              onSelectCategory={category => setSelectedCategory(category)}
+            />
+          </div>
+          <div
+            style={{
+              maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
+              overflowY: "auto",
+            }}
+          >
+            <MealListMaster
+              onAddToCart={meal => cartDispatch({ type: "ADD_ITEM", meal })}
+              selectedMeal={selectedMeal}
+              onSelectMeal={mealId =>
+                setSelectedMeal(x => (x === mealId ? null : mealId))
+              }
+            />
+          </div>
+          <div
+            style={{
+              maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
+              overflowY: "auto",
+            }}
+          >
+            {selectedMeal && (
+              <MealListDetail
+                meal={selectedMeal}
+                onAddToCart={meal => cartDispatch({ type: "ADD_ITEM", meal })}
+              />
+            )}
+          </div>
+        </div>
+
+        <div
+          style={{
+            border: "1px solid lightgrey",
+            marginTop: "5rem",
+            padding: "2rem",
+            borderRadius: 5,
+            backgroundColor: "white",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              borderBottom: "4px solid OliveDrab",
+            }}
+          >
+            <h2 style={{ color: "darkgreen" }}>Your Dinners Selections</h2>
+            <span style={{ color: "darkgreen" }}>
+              {cart.items.length} dinner{cart.items.length !== 1 && "s"}{" "}
+              selected /{" "}
+              <strong>
+                {REQUIRED_DINNERS - cart.items.length} left to select
+              </strong>
+            </span>
+          </div>
+          <CheckoutList
+            meals={cart.items}
+            onRemoveFromCart={meal =>
+              cartDispatch({ type: "REMOVE_ITEM", cartItemId: meal.cartItemId })
+            }
+          />
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -388,7 +478,7 @@ const CheckoutList: React.FC<CheckoutListProps> = ({
               }}
               onClick={() => onRemoveFromCart(meal)}
             >
-              <FiTrash2 style={{ marginRight: "0.5rem" }} /> Delete
+              <GoTrashcan style={{ marginRight: "0.5rem" }} /> Delete
             </button>
           </li>
         )
@@ -723,6 +813,30 @@ const PopoverTableCell: React.FC<React.DetailedHTMLProps<
   />
 )
 
+const ErrorButton: React.FC<React.DetailedHTMLProps<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  HTMLButtonElement
+>> = ({ style, ...props }) => {
+  return (
+    <button
+      type="button"
+      style={{
+        minWidth: "5rem",
+        backgroundColor: "white",
+        padding: "0.75rem 1rem",
+        borderRadius: "2rem",
+        border: "2px solid FireBrick",
+        color: "FireBrick",
+        fontWeight: "bold",
+        whiteSpace: "nowrap",
+        cursor: "pointer",
+        ...style,
+      }}
+      {...props}
+    />
+  )
+}
+
 const Button: React.FC<React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   HTMLButtonElement
@@ -731,6 +845,7 @@ const Button: React.FC<React.DetailedHTMLProps<
     <button
       type="button"
       style={{
+        minWidth: "5rem",
         backgroundColor: "darkgreen",
         padding: "0.75rem 1rem",
         borderRadius: "2rem",
