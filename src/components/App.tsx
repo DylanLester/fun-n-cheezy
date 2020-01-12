@@ -1,12 +1,13 @@
-import React, { useRef, useState, useEffect, useReducer } from "react"
+import React, { useState, useReducer } from "react"
 import nanoid from "nanoid"
 import { FiTrash2 } from "react-icons/fi"
 import TooltipTrigger from "react-popper-tooltip"
 import formatNumber from "format-number"
 
 import { meals, Meal } from "../lib/meals"
+import australianMadeLogo from "../images/australianMadeLogo.jpg"
 
-const IMG_SERVER = "http://127.0.0.1:59756/"
+const IMG_SERVER = "http://localhost:5000/"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const colours = {
@@ -30,6 +31,12 @@ const categories: Category[] = [
   { id: "indian", name: "Indian" },
   { id: "internationalTastes", name: "International Tastes" },
   { id: "lamb", name: "Lamb" },
+  { id: "meatFree", name: "Meat Free" },
+  { id: "pasta", name: "Pasta" },
+  { id: "roasts", name: "Roasts" },
+  { id: "seafood", name: "Seafood" },
+  { id: "steaks", name: "Steaks" },
+  { id: "traditional", name: "Traditional" },
 ]
 
 type CartItem = Meal & { cartItemId: string }
@@ -49,30 +56,41 @@ const cartReducer = (state: CartItem[], action: cartReducerActions) => {
   }
 }
 
-const DEFAULT_DETAIL_VIEW_HEIGHT = 450
+/*
+  Problem: different length detail descriptions cause the height of the component
+  to jump up and down.
+
+  This is actually an interesting problem. Here are a couple of solutions: 1.
+  Iterate over all detail view permutations and calculate the max height -- use
+  this height for the detail view. 2. Restrict the max height of the detail view
+  to a static number and restrict the detail description's length to a maximum 
+  size.
+
+  1. This is quite hard to do and may be overengineering the problem. This also
+  stops us from being able to lazy load each master list item and forces a large
+  load of the initial list. This may or may not cause issues depending on the 
+  domain information -- i.e. is the list always going to be small enough to load
+  at once?
+  2. This is a very easy implementation. This does spread
+  constraints/dependencies/coupling of the systems more tightly -- i.e. the 
+  CMS/description input field will need to be aware of this text field restriction.
+  If this is not respected issues may occur, and to make this worse, this may need
+  to be respected across entirely different systems. A failsafe for this would
+  be to truncate/scroll-the-detail-view the text in this application code, however
+  this may result in a worse user experience.
+
+  Option 2 has been implemented
+*/
+const MASTER_DETAIL_SIBLINGS_HEIGHT = 500
+const DETAIL_IMAGE_MAX_HEIGHT = 300
+// const HOVER_CARD_MAX_HEIGHT = 400
+const HOVER_CARD_DESCRIPTION_MAX_HEIGHT = 140
 const REQUIRED_DINNERS = 6
 
 const App: React.FC = () => {
-  const [detailViewHeight, setDetailViewHeight] = useState(
-    DEFAULT_DETAIL_VIEW_HEIGHT
-  )
-  const detailViewRef = useRef<HTMLDivElement>(null)
-
   const [selectedCategory, setSelectedCategory] = useState(categories[0])
-  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(meals[0])
   const [cart, cartDispatch] = useReducer(cartReducer, [])
-
-  useEffect(() => {
-    if (detailViewRef.current) {
-      // if this can be done in CSS that would be better
-      setDetailViewHeight(detailViewRef.current.getBoundingClientRect().height)
-    }
-  }, [])
-
-  const heightOfMasterDetailSectionSiblings =
-    detailViewHeight > DEFAULT_DETAIL_VIEW_HEIGHT
-      ? detailViewHeight
-      : DEFAULT_DETAIL_VIEW_HEIGHT
 
   return (
     <div
@@ -119,12 +137,7 @@ const App: React.FC = () => {
           marginTop: "1.5rem",
         }}
       >
-        <div
-          style={{
-            maxHeight: heightOfMasterDetailSectionSiblings,
-            overflowY: "auto",
-          }}
-        >
+        <div style={{ maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT }}>
           <MealCategories
             selectedCategory={selectedCategory}
             onSelectCategory={category => setSelectedCategory(category)}
@@ -132,7 +145,7 @@ const App: React.FC = () => {
         </div>
         <div
           style={{
-            maxHeight: heightOfMasterDetailSectionSiblings,
+            maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
             overflowY: "auto",
           }}
         >
@@ -144,7 +157,12 @@ const App: React.FC = () => {
             }
           />
         </div>
-        <div ref={detailViewRef}>
+        <div
+          style={{
+            maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
+            overflowY: "auto",
+          }}
+        >
           {selectedMeal && (
             <MealListDetail
               meal={selectedMeal}
@@ -193,9 +211,18 @@ const MealCategories: React.FC<MealCategoriesProps> = ({
   onSelectCategory,
 }) => {
   return (
-    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+    <ul
+      style={{
+        listStyle: "none",
+        padding: 0,
+        margin: 0,
+        height: "100%",
+        overflowY: "auto",
+        border: "1px solid lightgrey",
+        borderRadius: 5,
+      }}
+    >
       {categories.map((category, i) => {
-        const isFirst = i === 0
         const isLast = i === categories.length - 1
         const isSelected = category.id === selectedCategory.id
 
@@ -205,16 +232,12 @@ const MealCategories: React.FC<MealCategoriesProps> = ({
             style={{
               textAlign: "center",
               padding: "1rem",
-              border: "1px solid lightgrey",
-              color: isSelected ? "darkgreen" : "grey",
+              borderBottom: isLast ? "none" : "1px solid lightgrey",
               fontWeight: "bold",
               fontFamily: "sans-serif",
               cursor: "pointer",
-              borderBottom: isLast ? "auto" : "none",
-              borderTopLeftRadius: isFirst ? 5 : "auto",
-              borderTopRightRadius: isFirst ? 5 : "auto",
-              borderBottomLeftRadius: isLast ? 5 : "auto",
-              borderBottomRightRadius: isLast ? 5 : "auto",
+              color: isSelected ? "darkgreen" : "grey",
+              backgroundColor: isSelected ? "honeydew" : "inherit",
               textDecoration: isSelected ? "underline" : "none",
             }}
             onClick={() => onSelectCategory(category)}
@@ -296,7 +319,7 @@ const MealListDetail: React.FC<MealListDetailProps> = ({
       <img
         src={IMG_SERVER + meal.id + ".jpg"}
         alt={meal.name}
-        style={{ width: "100%" }}
+        style={{ width: "100%", maxHeight: DETAIL_IMAGE_MAX_HEIGHT }}
       />
       <h3
         style={{
@@ -408,7 +431,14 @@ const InfoButtonWithPopover: React.FC<{ meal: Meal }> = ({ meal }) => {
             <h4 style={{ margin: 0, fontSize: "1.5rem", color: "darkgreen" }}>
               {meal.name}
             </h4>
-            <p style={{ color: "grey", fontFamily: "sans-serif" }}>
+            <p
+              style={{
+                color: "grey",
+                fontFamily: "sans-serif",
+                maxHeight: HOVER_CARD_DESCRIPTION_MAX_HEIGHT,
+                overflowY: "auto",
+              }}
+            >
               {meal.description}
             </p>
 
@@ -422,7 +452,8 @@ const InfoButtonWithPopover: React.FC<{ meal: Meal }> = ({ meal }) => {
                   color: "grey",
                   padding: "0.5rem",
                   cursor: "pointer",
-                  borderBottom: tab === 0 ? "2px solid OliveDrab" : "inherit",
+                  borderBottom:
+                    tab === 0 ? "2px solid OliveDrab" : "2px solid transparent",
                 }}
                 onClick={() => setTab(0)}
               >
@@ -437,7 +468,8 @@ const InfoButtonWithPopover: React.FC<{ meal: Meal }> = ({ meal }) => {
                   color: "grey",
                   padding: "0.5rem",
                   cursor: "pointer",
-                  borderBottom: tab === 1 ? "2px solid OliveDrab" : "inherit",
+                  borderBottom:
+                    tab === 1 ? "2px solid OliveDrab" : "2px solid transparent",
                 }}
                 onClick={() => setTab(1)}
               >
@@ -446,132 +478,203 @@ const InfoButtonWithPopover: React.FC<{ meal: Meal }> = ({ meal }) => {
             </div>
 
             {tab === 0 ? (
-              <p style={{ fontFamily: "sans-serif" }}>
-                {meal.ingredients.map(x => x.name).join(", ")}
-                {meal.contains.length && (
-                  <strong>
-                    {" "}
-                    Contains {meal.contains.map(x => x.name).join(", ")}
-                  </strong>
-                )}
-              </p>
+              <>
+                <p style={{ fontFamily: "sans-serif" }}>
+                  {meal.ingredients.map(x => x.name).join(", ")}
+                  {meal.contains.length && (
+                    <strong>
+                      {" "}
+                      Contains {meal.contains.map(x => x.name).join(", ")}
+                    </strong>
+                  )}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginTop: "2rem",
+                  }}
+                >
+                  <div style={{ flex: "0 0 40px", marginRight: "0.5rem" }}>
+                    <img
+                      src={australianMadeLogo}
+                      alt="Australian Made Logo"
+                      style={{
+                        maxWidth: "100%",
+                        height: "auto",
+                      }}
+                    />
+                  </div>
+                  <p
+                    style={{
+                      color: "darkgreen",
+                      fontFamily: "sans-serif",
+                      fontSize: "0.8rem",
+                      fontWeight: "bold",
+                      margin: 0,
+                    }}
+                  >
+                    Made in Australia from at least{" "}
+                    {percentageFormat(meal.australianMadePercentage)} Australian
+                    ingredients
+                    {meal.australianMadeLine && " " + meal.australianMadeLine}
+                  </p>
+                </div>
+              </>
             ) : (
-              <table style={{ fontFamily: "sans-serif", width: "100%" }}>
+              <table
+                style={{
+                  fontFamily: "sans-serif",
+                  width: "100%",
+                  borderCollapse: "collapse",
+                }}
+              >
                 <thead>
-                  <th></th>
-                  <th>Per 100g</th>
-                  <th>
-                    Per serve ({meal.nutritionalInformation.servingSizeG}g)
-                  </th>
+                  <tr>
+                    <th
+                      style={{
+                        padding: "0.75rem 0",
+                        borderBottom: "1px solid lightgrey",
+                      }}
+                    ></th>
+                    <th
+                      style={{
+                        color: "grey",
+                        padding: "0.75rem 0",
+                        borderBottom: "1px solid lightgrey",
+                        textTransform: "uppercase",
+                        fontSize: "0.75rem",
+                      }}
+                    >
+                      Per 100g
+                    </th>
+                    <th
+                      style={{
+                        color: "grey",
+                        padding: "0.75rem 0",
+                        borderBottom: "1px solid lightgrey",
+                        textTransform: "uppercase",
+                        fontSize: "0.75rem",
+                      }}
+                    >
+                      Per serve ({meal.nutritionalInformation.servingSizeG}g)
+                    </th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Energy (kj)</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>Energy (kj)</PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.energyKj)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.energyKj * servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Enery (cal)</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>Enery (cal)</PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(
                         kilojouleToKilocalorie(
                           meal.nutritionalInformation.energyKj
                         )
                       )}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         kilojouleToKilocalorie(
                           meal.nutritionalInformation.energyKj
                         ) * servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Protein</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>Protein</PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.protein)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.protein * servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Fat (total)</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>Fat (total)</PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.fatTotal)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.fatTotal * servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Fat (saturated)</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>
+                      Fat (saturated)
+                    </PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.fatSaturated)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.fatSaturated *
                           servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Carbs (total)</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>
+                      Carbs (total)
+                    </PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.carbsTotal)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.carbsTotal *
                           servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Carbs (sugars)</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>
+                      Carbs (sugars)
+                    </PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.carbsSugars)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.carbsSugars *
                           servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Fibre</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>Fibre</PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.fibre)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.fibre * servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                   <tr>
-                    <td>Sodium</td>
-                    <td style={{ textAlign: "center" }}>
+                    <PopoverTableRowHeading>Sodium</PopoverTableRowHeading>
+                    <PopoverTableCell>
                       {basicFormat(meal.nutritionalInformation.sodium)}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    </PopoverTableCell>
+                    <PopoverTableCell>
                       {basicFormat(
                         meal.nutritionalInformation.sodium * servingMultiplier
                       )}
-                    </td>
+                    </PopoverTableCell>
                   </tr>
                 </tbody>
               </table>
@@ -586,6 +689,39 @@ const InfoButtonWithPopover: React.FC<{ meal: Meal }> = ({ meal }) => {
     </span>
   )
 }
+
+const PopoverTableRowHeading: React.FC<React.DetailedHTMLProps<
+  React.TdHTMLAttributes<HTMLTableDataCellElement>,
+  HTMLTableDataCellElement
+>> = ({ style, ...props }) => (
+  <td
+    style={{
+      color: "grey",
+      padding: "0.75rem 0",
+      borderBottom: "1px solid lightgrey",
+      textTransform: "uppercase",
+      fontWeight: "bold",
+      fontSize: "0.75rem",
+      ...style,
+    }}
+    {...props}
+  />
+)
+
+const PopoverTableCell: React.FC<React.DetailedHTMLProps<
+  React.TdHTMLAttributes<HTMLTableDataCellElement>,
+  HTMLTableDataCellElement
+>> = ({ style, ...props }) => (
+  <td
+    style={{
+      textAlign: "center",
+      padding: "0.75rem 0",
+      borderBottom: "1px solid lightgrey",
+      ...style,
+    }}
+    {...props}
+  />
+)
 
 const Button: React.FC<React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -646,5 +782,7 @@ const InfoButton = React.forwardRef<
 
 const kilojouleToKilocalorie = (kj: number) => kj / 4.184
 const basicFormat = formatNumber({ round: 2 })
+const percentageFormat = (value: number) =>
+  formatNumber({ suffix: "%", round: 0 })(value * 100)
 
 export default App
