@@ -1,13 +1,12 @@
-import React, { useState } from "react"
+import React from "react"
 import { GoSignOut, GoChevronRight } from "react-icons/go"
 import { MdPhone } from "react-icons/md"
 import formatNumber from "format-number"
 
 import { PAGE_CONTENT_MAX_WIDTH } from "../lib/utils"
+import { Link, useRouteMatch } from "react-router-dom"
 
 const Header: React.FC = () => {
-  const [tab, setTab] = useState(2)
-
   return (
     <header>
       <div
@@ -102,33 +101,13 @@ const Header: React.FC = () => {
             justifyContent: "center",
           }}
         >
-          <HeaderNavTab
-            onClick={() => setTab(0)}
-            isSelected={tab === 0}
-            step={0}
-            text="Delivery date"
-          />
+          <HeaderNavTab to="delivery-date" step={0} text="Delivery date" />
           <GoChevronRight style={HeaderNavChevronStyles} />
-          <HeaderNavTab
-            onClick={() => setTab(1)}
-            isSelected={tab === 1}
-            step={1}
-            text="Plan selections"
-          />
+          <HeaderNavTab to="/plan-selections" step={1} text="Plan selections" />
           <GoChevronRight style={HeaderNavChevronStyles} />
-          <HeaderNavTab
-            onClick={() => setTab(2)}
-            isSelected={tab === 2}
-            step={2}
-            text="Meal selections"
-          />
+          <HeaderNavTab to="/meal-selections" step={2} text="Meal selections" />
           <GoChevronRight style={HeaderNavChevronStyles} />
-          <HeaderNavTab
-            onClick={() => setTab(3)}
-            isSelected={tab === 3}
-            step={3}
-            text="Confirm order"
-          />
+          <HeaderNavTab to="confirm-order" step={3} text="Confirm order" />
         </div>
       </nav>
     </header>
@@ -140,15 +119,16 @@ const HeaderNavChevronStyles: React.CSSProperties = {
   fontSize: "0.9rem",
 }
 
-const HeaderNavTab: React.FC<HeaderNavTabProps> = ({
-  onClick,
-  isSelected,
-  step,
-  text,
-}) => {
+// ============================================================================
+// HeaderNavTab
+// ============================================================================
+
+const HeaderNavTab: React.FC<HeaderNavTabProps> = ({ to, step, text }) => {
+  const isSelected = !!useRouteMatch(to)
+
   return (
-    <div
-      onClick={onClick}
+    <Link
+      to={to}
       style={{
         padding: "1.25rem 1rem",
         margin: "0 0.75rem",
@@ -157,6 +137,7 @@ const HeaderNavTab: React.FC<HeaderNavTabProps> = ({
         borderBottom: isSelected
           ? "4px solid YellowGreen"
           : "4px solid transparent",
+        textDecoration: "none",
       }}
     >
       <div
@@ -180,13 +161,12 @@ const HeaderNavTab: React.FC<HeaderNavTabProps> = ({
       >
         {text}
       </div>
-    </div>
+    </Link>
   )
 }
 
 interface HeaderNavTabProps {
-  onClick: () => void
-  isSelected: boolean
+  to: string
   step: number
   text: string
 }

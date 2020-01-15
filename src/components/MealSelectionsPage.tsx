@@ -14,7 +14,6 @@ import {
   IMG_SERVER,
 } from "../lib/utils"
 import australianMadeLogo from "../images/australianMadeLogo.jpg"
-import Header from "./Header"
 import Footer from "./Footer"
 import Button from "./Button"
 import InfoButton from "./InfoButton"
@@ -77,8 +76,6 @@ const MealSelectionsPage: React.FC = () => {
           Ok
         </ErrorButton>
       </Modal>
-
-      <Header />
 
       {/* Order info section */}
       <section

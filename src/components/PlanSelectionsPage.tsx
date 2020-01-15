@@ -8,7 +8,6 @@ import {
   HOVER_CARD_DESCRIPTION_MAX_HEIGHT,
   IMG_SERVER,
 } from "../lib/utils"
-import Header from "./Header"
 import Footer from "./Footer"
 import Button from "./Button"
 import InfoButton from "./InfoButton"
@@ -17,8 +16,6 @@ import { smallerMeals, SmallerMeal } from "../lib/meals"
 const PlanSelectionsPage: React.FC = () => {
   return (
     <>
-      <Header />
-
       <div
         style={{
           display: "grid",
