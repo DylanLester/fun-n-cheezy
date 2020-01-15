@@ -33,6 +33,15 @@ export interface Meal {
   // imgUrl (probably not needed as it should use the ID of the item) or should be sourced from a CRM
 }
 
+export interface SmallerMeal {
+  id: string
+  name: string
+  description: string
+  priceCents: number
+  numberOfServings: number
+  isDessert: boolean
+}
+
 export const categories: Category[] = [
   { id: "all", name: "Show All Dinners" },
   { id: "freshChilled", name: "Fresh Chilled" },
@@ -333,4 +342,116 @@ export const meals = [
   cornedBeef,
   chickenAndCashews,
   shepherdsPie,
+]
+
+export const miniMeals = {
+  id: "miniMeals",
+  name: "Mini Meals",
+  description: `At Lite n' Easy we know there are times when you can have too much of a good thing.
+
+
+  That's why we've created Mini Meals - a smaller, more versatile serving of your favourite meals. Mini Meals are great at work, for the kids, or as a convenient, healthy snack.
+  
+  
+  Mini Meals by Lite n' Easy - proof that good things come in smaller packages.
+  
+  
+  Add a pack to your order today!
+  
+  
+  Remember to trade off the extra calories with a little extra exercise.`,
+  priceCents: 2800,
+  numberOfServings: 4,
+  isDessert: false,
+}
+
+export const mealsInABowl = {
+  id: "mealsInABowl",
+  name: "Meals in a Bowl",
+  description: `Lite n' Easy's frozen Meals in a Bowl are great as a lunch, snack or even as a smaller dinner meal.
+
+
+  They also make a delicious, healthy treat for the kids, especially during school holidays.
+  
+  
+  Add a pack to your order today!!
+  
+  
+  Remember to trade off the extra calories with a little extra exercise.`,
+  priceCents: 2850,
+  numberOfServings: 5,
+  isDessert: false,
+}
+
+export const liteMeals = {
+  id: "liteMeals",
+  name: "Lite Meals",
+  description: `Lite Meals are a new range of our most popular lunch meals selected exclusively from the calorie controlled menu plans. They are perfectly sized as a delicious lunch or snack the whole family can enjoy.
+
+
+  Remember to trade off the extra calories with a little extra exercise.`,
+  priceCents: 3250,
+  numberOfServings: 5,
+  isDessert: false,
+}
+
+export const soups = {
+  id: "soups",
+  name: "Soups",
+  description: `Lite n' Easy's delicious range of hearty soups are a great treat the whole family can enjoy.
+
+
+  If you normally order just the Lite n' Easy dinners, why not add some soups to your next delivery to use as part of your own healthy lunch.
+  
+  
+  And at only $3.30 each when you order a pack of 5 with your normal delivery, they're excellent value!
+  
+  
+  Add a pack to your order today!
+  
+  
+  Remember to trade off the extra calories with a little extra exercise.`,
+  priceCents: 1650,
+  numberOfServings: 5,
+  isDessert: false,
+}
+
+export const dessertsVarietyPack = {
+  id: "dessertsVarietyPack",
+  name: "Desserts Variety Pack",
+  description: `If you would like to sample four of the Lite n' Easy's delicious desserts, why not add a Variety Pack to your next delivery.
+  
+  
+  <[BULLET LIST, MUST BE SERVED THROUGH A CMS]>`,
+  priceCents: 900,
+  numberOfServings: 4,
+  isDessert: true,
+}
+
+export const dessertsAppleCrumble = {
+  id: "dessertsAppleCrumble",
+  name: "Desserts Apple Crumble",
+  description: `Healthy eating the Lite n' Easy way is more of a treat than ever. Now you and the whole family can enjoy delicious Apple Crumble desserts - with all the taste but only about half the calories you might expect.
+  Even if you're trying to lose weight you can still enjoy the occasional Lite n' Easy treat. Simply trade off the extra calories with a little extra exercise.
+  
+  
+  At only $2.25 each when you order a pack of 4 with your normal delivery, they're excellent value!
+  
+  
+  Add a pack to your order today!
+  
+  
+  Remember to trade off the extra calories with a little extra exercise.`,
+  priceCents: 900,
+  numberOfServings: 4,
+  isDessert: true,
+}
+
+export const smallerMeals = [
+  miniMeals,
+  mealsInABowl,
+  liteMeals,
+  soups,
+  dessertsVarietyPack,
+  dessertsAppleCrumble,
 ]

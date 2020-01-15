@@ -7,7 +7,12 @@ import TooltipTrigger from "react-popper-tooltip"
 import Modal from "react-modal"
 
 import { categories, Category, meals, Meal } from "../lib/meals"
-import { PAGE_CONTENT_MAX_WIDTH } from "../lib/utils"
+import {
+  PAGE_CONTENT_MAX_WIDTH,
+  USER,
+  HOVER_CARD_DESCRIPTION_MAX_HEIGHT,
+  IMG_SERVER,
+} from "../lib/utils"
 import australianMadeLogo from "../images/australianMadeLogo.jpg"
 import Header from "./Header"
 import Footer from "./Footer"
@@ -113,7 +118,7 @@ const MealSelectionsPage: React.FC = () => {
       <section style={{ padding: "0 1rem" }}>
         <div
           style={{
-            margin: "0 auto 5rem",
+            margin: "0 auto",
             padding: "1.5rem",
             borderRadius: 5,
             maxWidth: PAGE_CONTENT_MAX_WIDTH,
@@ -489,7 +494,9 @@ interface CheckoutListProps {
 // InfoButtonWithPopover
 // ============================================================================
 
-const InfoButtonWithPopover: React.FC<{ meal: Meal }> = ({ meal }) => {
+const InfoButtonWithPopover: React.FC<InfoButtonWithPopoverProps> = ({
+  meal,
+}) => {
   const [tab, setTab] = useState(0)
 
   const servingMultiplier = 100 / meal.nutritionalInformation.servingSizeG
@@ -777,6 +784,10 @@ const InfoButtonWithPopover: React.FC<{ meal: Meal }> = ({ meal }) => {
   )
 }
 
+interface InfoButtonWithPopoverProps {
+  meal: Meal
+}
+
 // ============================================================================
 // PopoverTableRowHeading
 // ============================================================================
@@ -822,8 +833,6 @@ const PopoverTableCell: React.FC<React.DetailedHTMLProps<
 // Helpers
 // ============================================================================
 
-const IMG_SERVER = "http://localhost:5000/"
-
 /*
   Problem: different length detail descriptions cause the height of the component
   to jump up and down.
@@ -851,13 +860,8 @@ const IMG_SERVER = "http://localhost:5000/"
 */
 const MASTER_DETAIL_SIBLINGS_HEIGHT = 500
 const DETAIL_IMAGE_MAX_HEIGHT = 300
-const HOVER_CARD_DESCRIPTION_MAX_HEIGHT = 140
 
 const REQUIRED_DINNERS = 6
-const USER = {
-  firstName: "Dylan",
-  lastName: "Lester",
-}
 const DELIVERY_DATE = new Date("2020/01/16")
 
 type CartItem = Meal & { cartItemId: string }
