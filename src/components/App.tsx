@@ -172,127 +172,164 @@ const App: React.FC = () => {
 
       <Header />
 
-      <div
-        style={{
-          margin: "0 auto",
-          padding: "1.5rem",
-          borderRadius: 5,
-          maxWidth: PAGE_CONTENT_MAX_WIDTH,
-          backgroundColor: "whiteSmoke",
-          border: "1px solid lightgrey",
-          boxSizing: "border-box",
-        }}
-      >
+      {/* The padding for the x axis serves to align this section with the rest of the page's sections */}
+      <section style={{ padding: "0 1rem" }}>
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            borderBottom: "4px solid OliveDrab",
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                color: "darkgreen",
-                fontWeight: "normal",
-                marginTop: 0,
-                marginBottom: "0.5rem",
-              }}
-            >
-              Choose Dinners
-            </h1>
-            <div style={{ color: "darkgreen", marginBottom: "1rem" }}>
-              {cart.items.length} dinner{cart.items.length !== 1 && "s"}{" "}
-              selected /{" "}
-              <strong>
-                {REQUIRED_DINNERS - cart.items.length} left to select
-              </strong>
-            </div>
-          </div>
-          <Button onClick={() => cartDispatch({ type: "CONFIRM_ITEMS" })}>
-            Confirm Selections
-          </Button>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 2fr 2fr",
-            gridColumnGap: "1.5rem",
-            marginTop: "1.5rem",
-          }}
-        >
-          <div style={{ maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT }}>
-            <MealCategories
-              selectedCategory={selectedCategory}
-              onSelectCategory={category => setSelectedCategory(category)}
-            />
-          </div>
-          <div
-            style={{
-              maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
-              overflowY: "auto",
-            }}
-          >
-            <MealListMaster
-              meals={mealsFilteredByCategory}
-              onAddToCart={meal => cartDispatch({ type: "ADD_ITEM", meal })}
-              selectedMeal={selectedMeal}
-              onSelectMeal={mealId =>
-                setSelectedMeal(x => (x === mealId ? null : mealId))
-              }
-            />
-          </div>
-          <div
-            style={{
-              maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
-              overflowY: "auto",
-            }}
-          >
-            {selectedMeal && (
-              <MealListDetail
-                meal={selectedMeal}
-                onAddToCart={meal => cartDispatch({ type: "ADD_ITEM", meal })}
-              />
-            )}
-          </div>
-        </div>
-
-        <div
-          style={{
-            border: "1px solid lightgrey",
-            marginTop: "5rem",
-            padding: "2rem",
+            margin: "0 auto 5rem",
+            padding: "1.5rem",
             borderRadius: 5,
-            backgroundColor: "white",
+            maxWidth: PAGE_CONTENT_MAX_WIDTH,
+            backgroundColor: "whiteSmoke",
+            border: "1px solid lightgrey",
+            boxSizing: "border-box",
           }}
         >
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "baseline",
               borderBottom: "4px solid OliveDrab",
+              alignItems: "center",
             }}
           >
-            <h2 style={{ color: "darkgreen" }}>Your Dinners Selections</h2>
-            <span style={{ color: "darkgreen" }}>
-              {cart.items.length} dinner{cart.items.length !== 1 && "s"}{" "}
-              selected /{" "}
-              <strong>
-                {REQUIRED_DINNERS - cart.items.length} left to select
-              </strong>
-            </span>
+            <div>
+              <h1
+                style={{
+                  color: "darkgreen",
+                  fontWeight: "normal",
+                  marginTop: 0,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                Choose Dinners
+              </h1>
+              <div style={{ color: "darkgreen", marginBottom: "1rem" }}>
+                {cart.items.length} dinner{cart.items.length !== 1 && "s"}{" "}
+                selected /{" "}
+                <strong>
+                  {REQUIRED_DINNERS - cart.items.length} left to select
+                </strong>
+              </div>
+            </div>
+            <Button onClick={() => cartDispatch({ type: "CONFIRM_ITEMS" })}>
+              Confirm Selections
+            </Button>
           </div>
-          <CheckoutList
-            meals={cart.items}
-            onRemoveFromCart={meal =>
-              cartDispatch({ type: "REMOVE_ITEM", cartItemId: meal.cartItemId })
-            }
-          />
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 2fr 2fr",
+              gridColumnGap: "1.5rem",
+              marginTop: "1.5rem",
+            }}
+          >
+            <div style={{ maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT }}>
+              <MealCategories
+                selectedCategory={selectedCategory}
+                onSelectCategory={category => setSelectedCategory(category)}
+              />
+            </div>
+            <div
+              style={{
+                maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
+                overflowY: "auto",
+              }}
+            >
+              <MealListMaster
+                meals={mealsFilteredByCategory}
+                onAddToCart={meal => cartDispatch({ type: "ADD_ITEM", meal })}
+                selectedMeal={selectedMeal}
+                onSelectMeal={mealId =>
+                  setSelectedMeal(x => (x === mealId ? null : mealId))
+                }
+              />
+            </div>
+            <div
+              style={{
+                maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT,
+                overflowY: "auto",
+              }}
+            >
+              {selectedMeal && (
+                <MealListDetail
+                  meal={selectedMeal}
+                  onAddToCart={meal => cartDispatch({ type: "ADD_ITEM", meal })}
+                />
+              )}
+            </div>
+          </div>
+
+          <div
+            style={{
+              border: "1px solid lightgrey",
+              marginTop: "5rem",
+              padding: "2rem",
+              borderRadius: 5,
+              backgroundColor: "white",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                borderBottom: "4px solid OliveDrab",
+              }}
+            >
+              <h2 style={{ color: "darkgreen" }}>Your Dinners Selections</h2>
+              <span style={{ color: "darkgreen" }}>
+                {cart.items.length} dinner{cart.items.length !== 1 && "s"}{" "}
+                selected /{" "}
+                <strong>
+                  {REQUIRED_DINNERS - cart.items.length} left to select
+                </strong>
+              </span>
+            </div>
+            <CheckoutList
+              meals={cart.items}
+              onRemoveFromCart={meal =>
+                cartDispatch({
+                  type: "REMOVE_ITEM",
+                  cartItemId: meal.cartItemId,
+                })
+              }
+            />
+          </div>
         </div>
-      </div>
+      </section>
+
+      <footer
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: "white",
+          boxShadow:
+            "0 -10px 15px -3px rgba(0, 0, 0, 0.1), 0 -4px 6px -2px rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        <div
+          style={{
+            margin: "0 auto",
+            maxWidth: PAGE_CONTENT_MAX_WIDTH,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            // The padding for the x axis serves to align this section with the rest of the page's sections
+            padding: "0.75rem 1rem",
+          }}
+        >
+          <div style={{ fontFamily: "sans-serif", fontWeight: "bold" }}>
+            Scroll down to view your selections
+          </div>
+          <Button onClick={() => cartDispatch({ type: "CONFIRM_ITEMS" })}>
+            Confirm Selections
+          </Button>
+        </div>
+      </footer>
     </>
   )
 }
@@ -908,6 +945,7 @@ const Header: React.FC = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          // The padding for the x axis serves to align this section with the rest of the page's sections
           padding: "0.75rem 1rem",
         }}
       >
@@ -970,6 +1008,7 @@ const Header: React.FC = () => {
             style={{
               color: "darkgreen",
               fontFamily: "sans-serif",
+              fontSize: "0.9rem",
             }}
           >
             Call use on <strong>13 15 12</strong>
@@ -977,7 +1016,13 @@ const Header: React.FC = () => {
         </a>
       </div>
 
-      <nav style={{ backgroundColor: "darkgreen" }}>
+      <nav
+        style={{
+          backgroundColor: "darkgreen",
+          // The padding for the x axis serves to align this section with the rest of the page's sections
+          padding: "0 1rem",
+        }}
+      >
         <div
           style={{
             maxWidth: PAGE_CONTENT_MAX_WIDTH,
@@ -1021,6 +1066,8 @@ const Header: React.FC = () => {
         style={{
           backgroundColor: "whiteSmoke",
           borderBottom: "1px solid lightgrey",
+          // The padding for the x axis serves to align this section with the rest of the page's sections
+          padding: "0 1rem",
         }}
       >
         <div
