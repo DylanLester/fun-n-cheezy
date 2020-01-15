@@ -1,9 +1,11 @@
 import React, { useState, useReducer, useEffect } from "react"
 import nanoid from "nanoid"
-import { GoTrashcan, GoAlert } from "react-icons/go"
+import { GoTrashcan, GoAlert, GoChevronRight, GoSignOut } from "react-icons/go"
+import { MdPhone } from "react-icons/md"
 import TooltipTrigger from "react-popper-tooltip"
-import formatNumber from "format-number"
 import Modal from "react-modal"
+import formatNumber from "format-number"
+import { format as formatDate } from "date-fns"
 
 import { categories, Category, meals, Meal } from "../lib/meals"
 import australianMadeLogo from "../images/australianMadeLogo.jpg"
@@ -97,7 +99,14 @@ const MASTER_DETAIL_SIBLINGS_HEIGHT = 500
 const DETAIL_IMAGE_MAX_HEIGHT = 300
 // const HOVER_CARD_MAX_HEIGHT = 400
 const HOVER_CARD_DESCRIPTION_MAX_HEIGHT = 140
+const PAGE_CONTENT_MAX_WIDTH = 1160
+
 const REQUIRED_DINNERS = 6
+const USER = {
+  firstName: "Dylan",
+  lastName: "Lester",
+}
+const DELIVERY_DATE = new Date("2020/01/16")
 
 const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState(categories[0])
@@ -161,13 +170,17 @@ const App: React.FC = () => {
         </ErrorButton>
       </Modal>
 
+      <Header />
+
       <div
         style={{
+          margin: "0 auto",
           padding: "1.5rem",
           borderRadius: 5,
-          maxWidth: 1160,
+          maxWidth: PAGE_CONTENT_MAX_WIDTH,
           backgroundColor: "whiteSmoke",
           border: "1px solid lightgrey",
+          boxSizing: "border-box",
         }}
       >
         <div
@@ -884,6 +897,227 @@ const InfoButton = React.forwardRef<
     </button>
   )
 })
+
+const Header: React.FC = () => {
+  const [tab, setTab] = useState(2)
+
+  return (
+    <header style={{ marginBottom: "2rem" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0.75rem 1rem",
+        }}
+      >
+        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+        <a
+          href="#"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            textDecoration: "none",
+          }}
+        >
+          <GoSignOut
+            style={{
+              color: "OliveDrab",
+              marginRight: "0.5rem",
+              fontSize: "0.9rem",
+            }}
+          />{" "}
+          <span
+            style={{
+              color: "darkgreen",
+              fontWeight: "bold",
+              fontFamily: "sans-serif",
+              fontSize: "0.9rem",
+            }}
+          >
+            Abandon Order
+          </span>
+        </a>
+
+        <h4
+          style={{
+            margin: 0,
+            fontFamily: "sans-serif",
+            color: "darkgreen",
+            fontSize: "1.5rem",
+          }}
+        >
+          Fun n<span style={{ color: "OliveDrab" }}>'</span> Cheezy
+        </h4>
+
+        {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+        <a
+          href="#"
+          style={{
+            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <MdPhone
+            style={{
+              color: "darkgreen",
+              marginRight: "0.5rem",
+              fontSize: "0.9rem",
+            }}
+          />{" "}
+          <span
+            style={{
+              color: "darkgreen",
+              fontFamily: "sans-serif",
+            }}
+          >
+            Call use on <strong>13 15 12</strong>
+          </span>
+        </a>
+      </div>
+
+      <nav style={{ backgroundColor: "darkgreen" }}>
+        <div
+          style={{
+            maxWidth: PAGE_CONTENT_MAX_WIDTH,
+            margin: "0 auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <HeaderNavTab
+            onClick={() => setTab(0)}
+            isSelected={tab === 0}
+            step={0}
+            text="Delivery date"
+          />
+          <GoChevronRight style={HeaderNavChevronStyles} />
+          <HeaderNavTab
+            onClick={() => setTab(1)}
+            isSelected={tab === 1}
+            step={1}
+            text="Plan selections"
+          />
+          <GoChevronRight style={HeaderNavChevronStyles} />
+          <HeaderNavTab
+            onClick={() => setTab(2)}
+            isSelected={tab === 2}
+            step={2}
+            text="Meal selections"
+          />
+          <GoChevronRight style={HeaderNavChevronStyles} />
+          <HeaderNavTab
+            onClick={() => setTab(3)}
+            isSelected={tab === 3}
+            step={3}
+            text="Confirm order"
+          />
+        </div>
+      </nav>
+
+      <div
+        style={{
+          backgroundColor: "whiteSmoke",
+          borderBottom: "1px solid lightgrey",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            maxWidth: PAGE_CONTENT_MAX_WIDTH,
+            margin: "0 auto",
+          }}
+        >
+          <div style={{ padding: "1.25rem", paddingLeft: 0 }}>
+            <div style={HeaderUserSectionSecondaryTextStyles}>Member name</div>
+            <div style={HeaderUserSectionPrimaryTextStyles}>
+              {USER.firstName} {USER.lastName}
+            </div>
+          </div>
+          <div style={{ padding: "1.25rem" }}>
+            <div style={HeaderUserSectionSecondaryTextStyles}>
+              For delivery on
+            </div>
+            <div style={HeaderUserSectionPrimaryTextStyles}>
+              {formatDate(DELIVERY_DATE, "eeee, d MMMM yyyy")}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+const HeaderNavChevronStyles: React.CSSProperties = {
+  color: "DarkSeaGreen",
+  fontSize: "0.9rem",
+}
+const HeaderUserSectionSecondaryTextStyles: React.CSSProperties = {
+  color: "Gray",
+  fontFamily: "sans-serif",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  fontSize: "0.6rem",
+  marginBottom: "0.25rem",
+}
+const HeaderUserSectionPrimaryTextStyles: React.CSSProperties = {
+  fontFamily: "sans-serif",
+  fontWeight: "bold",
+  fontSize: "0.8rem",
+}
+
+const HeaderNavTab: React.FC<HeaderNavTabProps> = ({
+  onClick,
+  isSelected,
+  step,
+  text,
+}) => {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        padding: "1.25rem 1rem",
+        margin: "0 0.75rem",
+        textAlign: "center",
+        cursor: "pointer",
+        borderBottom: isSelected
+          ? "4px solid YellowGreen"
+          : "4px solid transparent",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "sans-serif",
+          fontSize: "0.6rem",
+          textTransform: "uppercase",
+          fontWeight: "bold",
+          color: isSelected ? "white" : "DarkSeaGreen",
+          marginBottom: "0.25rem",
+        }}
+      >
+        Step {formatNumber({ padLeft: 2 })(step + 1)}
+      </div>
+      <div
+        style={{
+          fontFamily: "sans-serif",
+          fontWeight: "bold",
+          color: isSelected ? "white" : "DarkSeaGreen",
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  )
+}
+
+interface HeaderNavTabProps {
+  onClick: () => void
+  isSelected: boolean
+  step: number
+  text: string
+}
 
 const kilojouleToKilocalorie = (kj: number) => kj / 4.184
 const basicFormat = formatNumber({ round: 2 })
