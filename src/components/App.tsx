@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useEffect } from "react"
+import React, { useState, useReducer } from "react"
 import nanoid from "nanoid"
 import { GoTrashcan, GoAlert, GoChevronRight, GoSignOut } from "react-icons/go"
 import { MdPhone } from "react-icons/md"
@@ -113,14 +113,10 @@ const App: React.FC = () => {
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null)
   const [cart, cartDispatch] = useReducer(cartReducer, { items: [] })
 
-  const mealsFilteredByCategory =
-    selectedCategory.id === "all"
-      ? meals
-      : meals.filter(x => x.categories.some(x => x.id === selectedCategory.id))
-
-  useEffect(() => {
-    setSelectedMeal(mealsFilteredByCategory[0])
-  }, [mealsFilteredByCategory])
+  const mealsFilteredByCategory = getMealsFilteredByCategory(
+    meals,
+    selectedCategory
+  )
 
   return (
     <>
@@ -228,7 +224,14 @@ const App: React.FC = () => {
             <div style={{ maxHeight: MASTER_DETAIL_SIBLINGS_HEIGHT }}>
               <MealCategories
                 selectedCategory={selectedCategory}
-                onSelectCategory={category => setSelectedCategory(category)}
+                onSelectCategory={category => {
+                  const mealsFilteredByCategory = getMealsFilteredByCategory(
+                    meals,
+                    category
+                  )
+                  setSelectedCategory(category)
+                  setSelectedMeal(mealsFilteredByCategory[0])
+                }}
               />
             </div>
             <div
@@ -1165,6 +1168,11 @@ interface HeaderNavTabProps {
   step: number
   text: string
 }
+
+const getMealsFilteredByCategory = (meals: Meal[], category: Category) =>
+  category.id === "all"
+    ? meals
+    : meals.filter(x => x.categories.some(x => x.id === category.id))
 
 const kilojouleToKilocalorie = (kj: number) => kj / 4.184
 const basicFormat = formatNumber({ round: 2 })
