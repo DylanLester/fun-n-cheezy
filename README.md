@@ -1,7 +1,7 @@
 Code as of the version on my PC:
-[Plan selections page](./plan-selections-page.PNG)
+![Plan selections page](./plan-selections-page.PNG)
 
-[Meal selections page](./meal-selections-page.PNG)
+![Meal selections page](./meal-selections-page.PNG)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
